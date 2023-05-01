@@ -1,0 +1,21 @@
+ok in this file we'll write every step of building this app
+let's start by installing react with typescript for front-end
+
+1-npm create vite@latest and then choose name and type npm install 
+
+2- install required packages for this app, here we installed mui for styling and redux for managing statement and x-data-grid for tables 
+
+3- Choosing a suitable design for the app : this include making a file for used colors and styles for the app( theme.ts)
+
+4-Creating different components which we will use in different places
+
+starting by creating navbar and the dashboard
+
+we need to make a files for reusable styles.
+
+5- in the navbar file we start creating the components of it (our logo , our links );
+
+
+6- in the dashboard file we setup our landing page; (dashboards boxes)
+
+7- seting up redux
