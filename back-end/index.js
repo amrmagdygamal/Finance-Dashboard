@@ -3,52 +3,43 @@ import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import cors from "cors";
+import dotenv from "dotenv";
 import helmet from "helmet";
 import morgan from "morgan";
-import dotenv from "dotenv";
 import kpiRoutes from "./routes/kpi.js";
 import KPI from "./models/KPI.js";
-import { kpis } from "./data/data.js"
+import { kpis } from "./data/data.js";
 
 
 
-
+/* CONFIGURATIONS */
 dotenv.config();
-
 const app = express();
-
 app.use(express.json());
-
 app.use(helmet());
-
-app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin"}));
-
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
-
 app.use(bodyParser.json());
-
 app.use(bodyParser.urlencoded({ extended: false }));
-
 app.use(cors());
 
-
-/*Routes*/
-
-app.use("kpi", kpiRoutes);
+/* ROUTES */
+app.use("/kpi", kpiRoutes);
 
 
-/* MONGOOSE SETUP */ 
+/* MONGOOSE SETUP */
 const PORT = process.env.PORT || 9000;
+mongoose
+  .connect(process.env.CONNECT_MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(async () => {
+    app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
 
-mongoose.connect(process.env.CONNECT_MONGO, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(async () => {
-  app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
+  // Add data one time only or as needed
+  
+  // await mongoose.connections.db.dropDatabase();
 
-  await mongoose.connections.db.dropDatabase();
-
-  KPI.insertMany(kpis);
-})
-.catch((error) => console.log(`${error} did not connect`));
+  // KPI.insertMany(kpis);
+}).catch((error) => console.log(`${error} did not connect`));
