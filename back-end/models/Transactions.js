@@ -18,7 +18,7 @@ const TransactionSchema = new Schema(
       currency: "USD",
       get: (v) => v / 100,
     },
-    productIds: [
+    productsIds: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Products"

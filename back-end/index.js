@@ -7,8 +7,8 @@ import dotenv from "dotenv";
 import helmet from "helmet";
 import morgan from "morgan";
 import kpiRoutes from "./routes/kpi.js";
-import productRoutes from "./models/Products.js";
-import ProductsModel from './models/Products.js'
+import productRoutes from "./routes/product.js"
+import Product from './models/Product.js'
 import KPI from "./models/KPI.js";
 import { kpis, products } from "./data/data.js";
 
@@ -42,11 +42,11 @@ mongoose
 
     // Add data one time only or as needed
 
-    // if (mongoose.connections.length > 0) {
-    //   await mongoose.connections[0].db.dropDatabase();
-    // }
+
+    // await ProductsModel.deleteMany({});
+    //   ProductsModel.insertMany(products);
 
     // KPI.insertMany(kpis);
-    // ProductsModel.insertMany(products);
+  
   })
   .catch((error) => console.log(`${error} did not connect`));
