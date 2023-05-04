@@ -482,7 +482,7 @@ const Dashboard = () => {
               top: 20,
               right: 25,
               bottom: 40,
-              left: 0,
+              left: -10,
               
             }}
           >
