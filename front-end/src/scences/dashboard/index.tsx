@@ -20,10 +20,15 @@ import {
   YAxis,
   ZAxis,
 } from "recharts";
-import { useGetKpisQuery, useGetProductsQuery } from "../../state/api";
+import {
+  useGetKpisQuery,
+  useGetProductsQuery,
+  useGetTransactionsQuery,
+} from "../../state/api";
 import { useMemo } from "react";
 import BoxHeader from "../../components/BoxHeader";
 import FlexBetween from "../../components/FlexBetween";
+import { DataGrid, GridCellParams } from "@mui/x-data-grid";
 
 const gridTemplateLarge = `
   "a b c"
@@ -144,21 +149,94 @@ const Dashboard = () => {
   const productExpenseData = useMemo(() => {
     return (
       productsData &&
-      productsData.map(
-        ({ _id, price, expense }) => {
-          return {
-            id: _id,
-            price: price,
-            expense: expense
-          };
-        }
-      )
+      productsData.map(({ _id, price, expense }) => {
+        return {
+          id: _id,
+          price: price,
+          expense: expense,
+        };
+      })
     );
   }, [productsData]);
+
+  // PRODUCTS AREA DATA
+  // #########################################
+  const { data: transactionsData } = useGetTransactionsQuery();
+
+
+  const pieChartData = useMemo(() => {
+    if(operationalData) {
+      const totalExpenses = operationalData[0].totalExpenses;
+      return Object.entries(operationalData[0].expensesByCategory).map(
+        ([key, value]) => {
+          return [
+            {
+              name: key,
+              value: value,
+            },
+            {
+              name: `${key} of Total`,
+              value: totalExpenses - value,
+            }
+          ]
+        }
+      )
+    }
+  }, [operationalData])
+
+
+  const productsColumns = [
+    {
+      field: "_id",
+      headerName: "id",
+      flex: 1,
+    },
+    {
+      field: "expense",
+      headerName: "Expense",
+      flex: 0.5,
+      renderCell: (params: GridCellParams) => `$${params.value}`,
+    },
+    {
+      field: "price",
+      headerName: "Price",
+      flex: 0.5,
+      renderCell: (params: GridCellParams) => `$${params.value}`,
+    },
+  ];
+
+  const transactionsColumns = [
+    {
+      field: "_id",
+      headerName: "id",
+      flex: 1,
+    },
+    {
+      field: "buyer",
+      headerName: "Buyer",
+      flex: 0.67,
+      renderCell: (params: GridCellParams) => `$${params.value}`,
+    },
+    {
+      field: "amount",
+      headerName: "Amount",
+      flex: 0.35,
+      renderCell: (params: GridCellParams) => `$${params.value}`,
+    },
+    {
+      field: "productIds",
+      headerName: "Count",
+      flex: 0.1,
+      renderCell: (params: GridCellParams) => (params.value as Array<string>).length,
+    },
+  ];
+
+
 
   return (
     <Box
       width="100%"
+      paddingBottom="5rem"
       height="100%"
       display="grid"
       gap="1.5rem"
@@ -177,7 +255,6 @@ const Dashboard = () => {
       }
     >
       {/* first box for Revenue and expenses  */}
-
       <DashboardBox gridArea="a">
         <BoxHeader
           title="Revenue and Expenses"
@@ -253,7 +330,6 @@ const Dashboard = () => {
       </DashboardBox>
 
       {/* second box for Profit and revenue  */}
-
       <DashboardBox gridArea="b">
         <BoxHeader
           title="Profit and Revenue"
@@ -315,7 +391,6 @@ const Dashboard = () => {
       </DashboardBox>
 
       {/* Box number 3 for Revenue  */}
-
       <DashboardBox gridArea="c">
         <BoxHeader
           title="Revenue Month by Month"
@@ -474,6 +549,7 @@ const Dashboard = () => {
         </FlexBetween>
       </DashboardBox>
 
+      {/* BOX number 6 for Products Prices vs Expenses */}
       <DashboardBox gridArea="f">
         <BoxHeader title="Products Prices vs Expenses" sideText="+4%" />
         <ResponsiveContainer width="100%" height="100%">
@@ -483,42 +559,172 @@ const Dashboard = () => {
               right: 25,
               bottom: 40,
               left: -10,
-              
             }}
           >
-            <CartesianGrid stroke={palette.grey[800]}/>
-            <XAxis 
-              type="number" 
-              dataKey="price" 
-              name="price" 
+            <CartesianGrid stroke={palette.grey[800]} />
+            <XAxis
+              type="number"
+              dataKey="price"
+              name="price"
               axisLine={false}
               tickLine={false}
-              style={{ fontSize: "10px"}}
+              style={{ fontSize: "10px" }}
               tickFormatter={(v) => `$${v}`}
             />
-            <YAxis 
-              type="number" 
-              dataKey="expense" 
-              name="expense" 
+            <YAxis
+              type="number"
+              dataKey="expense"
+              name="expense"
               axisLine={false}
               tickLine={false}
-              style={{ fontSize: "10px"}}
+              style={{ fontSize: "10px" }}
               tickFormatter={(v) => `$${v}`}
             />
             <ZAxis type="number" range={[20]} />
             <Tooltip formatter={(v) => `$${v}`} />
-            <Scatter name="Product Expense Ratio" data={productExpenseData} fill={palette.tertiary[500]} />
+            <Scatter
+              name="Product Expense Ratio"
+              data={productExpenseData}
+              fill={palette.tertiary[500]}
+            />
           </ScatterChart>
         </ResponsiveContainer>
       </DashboardBox>
 
-      <DashboardBox gridArea="g"></DashboardBox>
+      {/* Box number 7 for List of products */}
+      <DashboardBox gridArea="g">
+        <BoxHeader
+          title="List of products"
+          sideText={`${productsData?.length} products`}
+        />
 
-      <DashboardBox gridArea="h"></DashboardBox>
+        <Box
+          mt="0.5rem"
+          p="0 0.5rem"
+          height="75%"
+          sx={{
+            "& .MuiDataGrid-root": {
+              color: palette.grey[300],
+              border: "none",
+            },
+            "& .MuiDataGrid-cell": {
+              borderBottom: `1px solid ${palette.grey[800]} !important`,
+            },
+            "& .MuiDataGrid-columnHeaders": {
+              borderBottom: `1px solid ${palette.grey[800]} !important`,
+            },
+            "& .MuiDataGrid-columnSeparator": {
+              visibility: "hidden",
+            },
+          }}
+        >
+          <DataGrid
+            columnHeaderHeight={25}
+            rowHeight={35}
+            hideFooter={true}
+            rows={productsData || []}
+            columns={productsColumns}
+          />
+        </Box>
+      </DashboardBox>
 
-      <DashboardBox gridArea="i"></DashboardBox>
+      {/* Box number 8 for Recent Orders */}
+      <DashboardBox gridArea="h">
+        <BoxHeader
+          title="Recent Orders"
+          sideText={`${transactionsData?.length} latest transactions`}
+        />
 
-      <DashboardBox gridArea="j"></DashboardBox>
+        <Box
+          mt="1rem"
+          p="0 0.5rem"
+          height="80%"
+          sx={{
+            "& .MuiDataGrid-root": {
+              color: palette.grey[300],
+              border: "none",
+            },
+            "& .MuiDataGrid-cell": {
+              borderBottom: `1px solid ${palette.grey[800]} !important`,
+            },
+            "& .MuiDataGrid-columnHeaders": {
+              borderBottom: `1px solid ${palette.grey[800]} !important`,
+            },
+            "& .MuiDataGrid-columnSeparator": {
+              visibility: "hidden",
+            },
+          }}
+        >
+          <DataGrid
+            columnHeaderHeight={25}
+            rowHeight={35}
+            hideFooter={true}
+            rows={transactionsData || []}
+            columns={transactionsColumns}
+          />
+        </Box>
+      </DashboardBox>
+
+        {/* Box number 9 for Expense Breakdown By Category */}
+      <DashboardBox gridArea="i">
+        <BoxHeader 
+          title="Expense Breakdown By Category" 
+          sideText="+4%"
+        />
+        <FlexBetween mt="0.5rem" gap="0.5rem" p="0 1rem" textAlign="center">
+          {pieChartData?.map((data, i) => (
+            <Box key={`${data[0].name}-${i}`}>
+
+              <PieChart
+                width={90}
+                height={70}
+              >
+                <Pie
+                  stroke="none"
+                  data={data}
+                  innerRadius={18}
+                  outerRadius={35}
+                  paddingAngle={2}
+                  dataKey="value"
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={pieColor[index]} />
+                  ))}
+                </Pie>
+              </PieChart>
+              <Typography variant="h5">{data[0].name}</Typography>
+            </Box>
+          ))}
+          
+        </FlexBetween>
+
+      </DashboardBox>
+
+        
+        {/* Box number 10 for Summary and Explaination Data */}
+      <DashboardBox gridArea="j">
+        <BoxHeader 
+          title="Overall Summary and Explanation Data"
+          sideText="+15%"
+        />
+
+        <Box
+          height="15px"
+          margin="1.25rem 1rem 0.4rem 1rem"
+          borderRadius="1rem"
+          bgcolor={palette.primary[800]}
+        >
+          <Box
+            height="15px"
+            bgcolor={palette.primary[600]}
+            borderRadius="1rem"
+            width="40%"
+          ></Box>
+        </Box>
+          <Typography margin="0 1rem" variant="h6">
+            Hi there, I'm Amr; A full-Stack Developer. I learned a lot from building many apps with a lot of fuctionality and during this I faced a lot of errors which made me mad person I was hard to solve my errors in the bigannig but now I gained a lot of experience.
+          </Typography>
+      </DashboardBox>
     </Box>
   );
 };

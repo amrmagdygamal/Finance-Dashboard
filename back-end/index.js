@@ -45,11 +45,14 @@ mongoose
 
     // Add data one time only or as needed
 
+    // await KPI.deleteMany({});
+    // await Product.deleteMany({});
+    // await Transaction.deleteMany({});
 
-    // await ProductsModel.deleteMany({});
-    //   ProductsModel.insertMany(products);
+
 
     // KPI.insertMany(kpis);
+    // Product.insertMany(products)
     // Transaction.insertMany(transactions)
   
   })

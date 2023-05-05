@@ -4,30 +4,27 @@ import { loadType } from "mongoose-currency";
 const Schema = mongoose.Schema;
 loadType(mongoose);
 
-
-
 const TransactionSchema = new Schema(
   {
     buyer: {
-      type: mongoose.Types.Currency,
-      currency: "USD",
-      get: (v) => v / 100,
+      type: String,
+      required: true,
     },
     amount: {
       type: mongoose.Types.Currency,
       currency: "USD",
       get: (v) => v / 100,
     },
-    productsIds: [
+    productIds: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Products"
+        ref: "Product",
       },
     ],
   },
   { timestamps: true, toJSON: { getters: true } }
 );
 
-const Transactions = mongoose.model("Transactions", TransactionSchema);
+const Transaction = mongoose.model("Transaction", TransactionSchema);
 
-export default Transactions;
+export default Transaction;
